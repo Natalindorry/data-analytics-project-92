@@ -1,8 +1,8 @@
 -- Запрос находит 10 лучших по суммарной выручке продавцов
 select
-    CONCAT(e.first_name, ' ', e.last_name) as seller,
-    COUNT(s.sales_id) as operations,
-    SUM(s.quantity * p.price) as income
+    concat(e.first_name, ' ', e.last_name) as seller,
+    count(s.sales_id) as operations,
+    floor(sum(s.quantity * p.price)) as income
 from
     sales s
 join employees e
