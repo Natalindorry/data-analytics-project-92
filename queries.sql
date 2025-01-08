@@ -1,3 +1,9 @@
+-- Step 2. 10 самых продаваемых товаров
+-- https://docs.google.com/spreadsheets/d/1_5f9xp0Q9ht59aAIJNOj2bQzjcs0ecb1rPJkcd2ERTI/edit?usp=sharing
+
+-- Step 3. 10 товаров, проданных на наибольшую сумму
+-- https://docs.google.com/spreadsheets/d/1MYeXm9maQBxvFH4mgQmKhBDlVwKH2WjaMVPRrdN5Qgg/edit?usp=sharing
+
 -- Step 4. Подсчет общего количества покупателей
 select
     count(customer_id) as customers_count
@@ -63,8 +69,8 @@ from tab;
 select
 	case
 		when age >= 16 and age <= 25 then '16-25'
-		when age >= 26 and age < 40 then '26-40'
-		when age >= 40 then '40+'
+		when age >= 26 and age <= 40 then '26-40'
+		when age > 40 then '40+'
 	end as age_category,
 	count(customer_id) as age_count
 from customers
@@ -75,7 +81,7 @@ order by age_category;
 select
 	to_char(s.sale_date, 'YYYY-MM') as selling_month,
 	count(distinct(s.customer_id)) as total_customers,
-	round(sum(s.quantity * p.price), 0) as income
+	floor(sum(s.quantity * p.price)) as income
 from
 	sales s
 join
