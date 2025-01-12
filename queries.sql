@@ -36,40 +36,31 @@ join products p
     on s.product_id = p.product_id
 group by seller
 having floor(avg(s.quantity * p.price)) < (
-    select avg(s.quantity * p.price)
+    select floor(avg(s.quantity * p.price))
     from sales s
     left join products p on s.product_id = p.product_id
     )
 order by average_income;
 
 -- Выручка по дням недели
-with tab as (
-    select
-        concat(e.first_name, ' ', e.last_name) as seller,
-    	to_char(s.sale_date, 'ID') as number_day,
-    	to_char(s.sale_date, 'TMday') as day_of_week,
-    	floor(sum(s.quantity * p.price)) as income
-	from
-   		sales s
-	join employees e
-   		on s.sales_person_id = e.employee_id
-	join products p
-    	on s.product_id = p.product_id
-	group by seller, day_of_week, number_day
-	order by number_day, seller
-)
-
 select
-    seller,
-    day_of_week,
-    income
-from tab;
+	concat(e.first_name, ' ', e.last_name) as seller,
+    to_char(s.sale_date, 'TMday') as day_of_week,
+    floor(sum(s.quantity * p.price)) as income
+from
+	sales s
+join employees e
+	on s.sales_person_id = e.employee_id
+join products p
+	on s.product_id = p.product_id
+group by seller, day_of_week, to_char(s.sale_date, 'ID')
+order by to_char(s.sale_date, 'ID'), seller;
 
 -- Step 6. Количество покупателей в разных возрастных группах
 select
 	case
 		when age >= 16 and age <= 25 then '16-25'
-		when age >= 26 and age <= 40 then '26-40'
+		when age > 25 and age <= 40 then '26-40'
 		when age > 40 then '40+'
 	end as age_category,
 	count(customer_id) as age_count
@@ -99,8 +90,7 @@ with tab as (
 		concat(c.first_name, ' ', c.last_name) as customer,
 		s.sale_date,
 		row_number() over (partition by concat(c.first_name, ' ', c.last_name) order by s.sale_date) as sale_number,
-		concat(e.first_name, ' ', e.last_name) as seller,
-		p.price
+		concat(e.first_name, ' ', e.last_name) as seller
 	from
 		sales s
 	join
@@ -112,6 +102,7 @@ with tab as (
 	join
 		employees e
 			on s.sales_person_id = e.employee_id
+	where p.price = 0
 )
 
 select
@@ -121,7 +112,5 @@ select
 from
 	tab
 where sale_number = 1
-	and price = 0
 order by
 	customer_id;
-	
