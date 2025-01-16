@@ -84,33 +84,22 @@ order by
 	selling_month;
 
 -- Покупатели, первая покупка которых была в ходе проведения акций
-with tab as (
-	select
-		c.customer_id,
-		concat(c.first_name, ' ', c.last_name) as customer,
-		s.sale_date,
-		row_number() over (partition by concat(c.first_name, ' ', c.last_name) order by s.sale_date) as sale_number,
-		concat(e.first_name, ' ', e.last_name) as seller
-	from
-		sales s
-	join
-		customers c
-			on s.customer_id = c.customer_id
-	join
-		products p
-			on s.product_id = p.product_id
-	join
-		employees e
-			on s.sales_person_id = e.employee_id
-	where p.price = 0
-)
-
-select
-	customer,
-	sale_date,
-	seller
+select distinct on (c.customer_id)
+	concat(c.first_name, ' ', c.last_name) as customer,
+	s.sale_date,
+	concat(e.first_name, ' ', e.last_name) as seller
 from
-	tab
-where sale_number = 1
+	sales s
+join
+	customers c
+		on s.customer_id = c.customer_id
+join
+	products p
+		on s.product_id = p.product_id
+join
+	employees e
+		on s.sales_person_id = e.employee_id
+where p.price = 0
 order by
-	customer_id;
+	c.customer_id, s.sale_date;
+
